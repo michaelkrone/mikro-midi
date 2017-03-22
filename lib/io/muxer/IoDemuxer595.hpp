@@ -9,11 +9,12 @@ class Demuxer595 : public Demuxer {
   private:
     Ic595& mIc595;
     bool mAutoWrite;
+    bool mChanged;
     uint8_t* mBytes;
 
   public:
-  Demuxer595(Ic595& ic595, bool analog = false, uint32_t writeDelay = 0, bool autoWrite = true)
-    : Demuxer(ic595.mNumIcs, analog, 0), mIc595(ic595), mAutoWrite(autoWrite) {
+  Demuxer595(Ic595& ic595, uint32_t writeDelay = 0, bool autoWrite = true)
+    : Demuxer(ic595.mNumIcs, false, 0), mIc595(ic595), mAutoWrite(autoWrite), mChanged(false) {
       int len = (mIc595.mNumIcs * Ic595::NUM_CHANNELS) * sizeof(uint8_t);
       mBytes = (uint8_t*) malloc(len);
       memset(mBytes, 0, len);
@@ -34,6 +35,7 @@ class Demuxer595 : public Demuxer {
   }
 
   inline void setPin(ioPin pin, int value, bool write = true) {
+    mChanged = true;
     if (value) {
        mValues[pin / Ic595::NUM_CHANNELS] |= 1 << (pin % Ic595::NUM_CHANNELS);
     } else {
@@ -59,10 +61,19 @@ class Demuxer595 : public Demuxer {
   }
 
   inline void writeAll() {
+    if (!mChanged) {
+      return;
+    }
+
     for (uint8_t i = 0; i < mIc595.mNumIcs * Ic595::NUM_CHANNELS; i++) {
       mBytes[i] = mValues[i];
     }
+
     mIc595.writeAll(mBytes);
+  }
+
+  inline void update() {
+    writeAll();
   }
 };
 

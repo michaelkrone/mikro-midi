@@ -1,4 +1,3 @@
-
 /*
    mikroMIDI main
 */
@@ -54,13 +53,17 @@ class ChannelDisplay {
       if (blockCnt == 1) {
         w = VPOT_BAR_WIDTH;
         if (start != 0) {
+          // center the bar to the middle of the value
           x += (VPOT_BAR_WIDTH / 2) - 1;
         }
       } else if (start == mackie::VPotRingCenter) {
+        // if on first position align left, do not overlap
         x = DISPLAY_CENTER_X;
       } else {
+        // shift by padding and border
         x += DISPLAY_PADDING + BORDER_WIDTH;
         if (stop == mackie::VPotRingCenter + 1) {
+          // on last position align to the right border, do not overlap
           w = (DISPLAY_CENTER_X - x);
         }
       }
@@ -87,8 +90,9 @@ class ChannelDisplay {
       mDisplay.setFont(&Roboto_Medium10pt7b);
       mDisplay.setCursor(0, 44);
       for (i = addr[2]; i < addr[3]; i++) {
-          mDisplay.print((char) lcdState[i]);
+        mDisplay.print((char) lcdState[i]);
       }
+
       drawVpot();
     }
 

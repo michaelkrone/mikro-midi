@@ -1,8 +1,8 @@
 #pragma once
 
 #include "IoDefs.h"
-#include "IoOutput.hpp"
 #include "IoIc.hpp"
+#include "output/IoOutput.hpp"
 
 BEGIN_IO_NAMESPACE
 

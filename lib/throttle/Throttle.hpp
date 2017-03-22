@@ -39,12 +39,11 @@ public:
   }
 
   inline void invalidate() {
-    mUseValid = true;
-    mValid = false;
+      mValid = false;
+      mLastReset = 0;
   }
 
   inline void validate() {
-    mUseValid = true;
     mValid = true;
   }
 

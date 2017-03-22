@@ -6,8 +6,8 @@
 
 BEGIN_THROTTLE_NAMESPACE
 
-static const uint8_t MAX_THROTTLES = 16;
-static const unsigned long DEFAULT_THRESHOLD = 50;
+static const uint8_t MAX_THROTTLES = 8;
+static const unsigned long DEFAULT_THRESHOLD = 5;
 
 struct ThrottleItem {
   unsigned long lastReset;

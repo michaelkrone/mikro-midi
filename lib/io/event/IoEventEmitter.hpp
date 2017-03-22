@@ -22,10 +22,11 @@ class EventEmitter {
     return mInput;
   }
 
-  inline SignalChangeCallback* addListener(SignalEventType type, SignalChangeHandler handler, int args = 0) {
+  inline SignalChangeCallback* addListener(
+      SignalEventType type, SignalChangeHandler handler, int args = 0) {
     SignalChangeCallback* next = nextCallback();
 		if (!next) {
-      return next;
+      return NULL;
     }
 
   	next->setType(type);

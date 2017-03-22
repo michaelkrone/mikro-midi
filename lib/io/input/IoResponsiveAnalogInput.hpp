@@ -14,10 +14,14 @@ class ResponsiveAnalogInput : public Input {
     //   increase this to lessen the amount of easing (such as 0.1) and make the responsive values more responsive
     //   but doing so may cause more noise to seep through if sleep is not enabled
 
-  ResponsiveAnalogInput(ioPin pin, bool sleepEnable = false, float snapMultiplier = 0.1, int resolution = AnalogResolution)
+  ResponsiveAnalogInput(
+        ioPin pin, bool sleepEnable = false,
+        float snapMultiplier = 0.1, int resolution = AnalogResolution)
     : ResponsiveAnalogInput(NULL, pin, sleepEnable, snapMultiplier) {}
 
-  ResponsiveAnalogInput(Muxer* muxer, ioPin pin, bool sleepEnable = false, float snapMultiplier = 0.1, int resolution = AnalogResolution)
+  ResponsiveAnalogInput(
+        Muxer* muxer, ioPin pin, bool sleepEnable = false,
+        float snapMultiplier = 0.1, int resolution = AnalogResolution)
     : Input(muxer, pin, false, true)
     , mSleep(sleepEnable)
     , mResolution(resolution) {
@@ -77,10 +81,10 @@ protected:
      // if sleep and edge snap are enabled and the new value is very close to an edge, drag it a little closer to the edges
      // This'll make it easier to pull the output values right to the extremes without mSleeping,
      // and it'll make movements right near the edge appear larger, making it easier to wake up
-     if(mSleep && mEdgeSnapEnabled) {
-       if(newValue < mActivityThreshold) {
+     if (mSleep && mEdgeSnapEnabled) {
+       if (newValue < mActivityThreshold) {
          newValue = (newValue * 2) - mActivityThreshold;
-       } else if(newValue > mResolution - mActivityThreshold) {
+       } else if (newValue > mResolution - mActivityThreshold) {
          newValue = (newValue * 2) - mResolution + mActivityThreshold;
        }
      }
@@ -94,7 +98,7 @@ protected:
      mErrorEMA += ((newValue - mSmoothValue) - mErrorEMA) * 0.4;
 
      // if sleep has been enabled, sleep when the amount of error is below the activity threshold
-     if(mSleep) {
+     if (mSleep) {
        // recalculate mSleeping status
        mSleeping = abs(mErrorEMA) < mActivityThreshold;
      }
@@ -102,7 +106,7 @@ protected:
      // if we're allowed to sleep, and we're mSleeping
      // then don't update mResponsiveValue this loop
      // just output the existing mResponsiveValue
-     if(mSleep && mSleeping) {
+     if (mSleep && mSleeping) {
        return (int)mSmoothValue;
      }
 
@@ -120,7 +124,7 @@ protected:
 
      // when sleep is enabled, the emphasis is stopping on a mResponsiveValue quickly, and it's less about easing into position.
      // If sleep is enabled, add a small amount to snap so it'll tend to snap into a more accurate position before mSleeping starts.
-     if(mSleep) {
+     if (mSleep) {
        snap *= 0.5 + 0.5;
      }
 
@@ -128,9 +132,9 @@ protected:
      mSmoothValue += (newValue - mSmoothValue) * snap;
 
      // ensure output is in bounds
-     if(mSmoothValue < 0.0) {
+     if (mSmoothValue < 0.0) {
        mSmoothValue = 0.0;
-     } else if(mSmoothValue > mResolution - 1) {
+     } else if (mSmoothValue > mResolution - 1) {
        mSmoothValue = mResolution - 1;
      }
 

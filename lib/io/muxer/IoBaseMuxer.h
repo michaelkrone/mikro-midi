@@ -71,7 +71,7 @@ class Demuxer : public BaseMuxer {
     : BaseMuxer(numChannels, analog, delay, false) {}
   virtual void writePin(ioPin pin, int value);
   virtual void setPin(ioPin pin, int value, bool update);
-  inline void writeAll(int values);
+  inline void writeAll(int* values);
   inline void writeAll();
 };
 

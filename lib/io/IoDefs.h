@@ -6,7 +6,7 @@
 #include "muxer/IoMuxerDefs.h"
 #include "ic/IoIcDefs.h"
 #include "event/IoEventDefs.h"
-#include "fader/IoFaderDefs.h"
+#include "pid/IoPidDefs.h"
 
 BEGIN_IO_NAMESPACE
 
@@ -22,9 +22,7 @@ typedef enum {DebounceModeStable, DebounceModeLockout, DebounceModePromptDetecti
 
 static const ioPin NoCurrentPin = 255;
 static const uint8_t BounceIntervalDefault = 10;
-
 static const uint16_t AnalogResolution = 1024;
-
 static const uint16_t DefaultCapsense = 150;
 
 END_IO_NAMESPACE

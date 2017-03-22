@@ -1,2 +1,2 @@
 # mikro-midi
-USB MIDI Controller with Mackie Protocol support
+Teensy Microcontroller USB MIDI Controller with Mackie Protocol support

@@ -15,7 +15,7 @@ class TimecodeShifter {
     bool mCommonAnode;
 
   /**
-  Demuxer will have at least 2 shift registers chained: 1 decimal point and  1 enable control and
+  Demuxer will have at least 2 shift registers chained: 1 decimal point and 1 enable control
   */
 
   public:

@@ -3,63 +3,93 @@
    mikroMIDI main
 */
 
-// This optional setting causes Encoder to use more optimized code,
-// It must be defined before Encoder.h is included.
-// #define ENCODER_OPTIMIZE_INTERRUPTS
-// #include <Encoder.h>
+#include <MackieProtocol.hpp>
+mackie::MackieProtocol mp(mackie::OperationMode_MackieControl);
 
 #include <Throttle.hpp>
-#include <IoOutput.hpp>
-#include <IoTouchInput.hpp>
-#include <IoResponsiveAnalogInput.hpp>
-#include <ic/IoIcL293.hpp>
-#include <fader/IoMotorFader.hpp>
+#include <output/IoOutput.hpp>
+// #include <input/IoTouchInput.hpp>
+// #include <input/IoResponsiveAnalogInput.hpp>
+// #include <ic/IoIcL293.hpp>
+// #include <pid/IoPidController.hpp>
 
-io::ResponsiveAnalogInput faderLevel(14, true);
-io::TouchInput faderTouch(15);
+// #include <muxer/IoMuxer4051.hpp>
+#include <muxer/IoDemuxer595.hpp>
+
+#include <ic/IoIc595.hpp>
+#include <muxer/IoDemuxer595.hpp>
+#include "hardware/vu-meter/VuChannelMeter.hpp"
+
+io::Ic595 ic595(31, 30, 29, 2);
+io::Demuxer595 demuxer(ic595, 0, false);
+
+VuChannelMeter meter(demuxer, 0);
+
+// io::Ic4051 ic4051(14, 15, 16, 22, 8, 100);
+// io::Demuxer4051 demuxer(ic4051, true);
+
+// io::ResponsiveAnalogInput faderLevel(14, true);
+// io::TouchInput faderTouch(15);
 // io::Output enable(22);
 // io::Output motorA(20, true);
 // io::Output motorB(21, true);
 // io::IcL293 hBridge(&enable, &motorA, &motorB);
-// io::MotorFader fader(faderLevel, &faderTouch, hBridge, 0, 1, 4096);
+// io::PidController fader(faderLevel, hBridge, 0, 1, 4096);
 
-throttle::Throttle faderThrottle(1000);
+throttle::Throttle faderThrottle(5);
 
 int tlen = 10;
-int target[] = {1022, 40, 100, 500, 499, 550, 1022, 800, 300, 900};
+int target[] = {12, 11, 10, 9, 8, 5, 6, 7, 8, 9};
 
 void setup() {
-  analogWriteResolution(12);
-  analogWriteFrequency(20, 8789.062);
-  analogWriteFrequency(21, 8789.062);
+  // analogWriteResolution(12);
+  // analogWriteFrequency(20, 8789.062);
+  // analogWriteFrequency(21, 8789.062);
   // hBridge.stopAll();
 
-  Serial.begin(9600);
-  delay(1225);
+  // Serial.begin(9600);
+  delay(225);
   pinMode(13, OUTPUT);
   digitalWrite(13, 1);
-  delay(1225);
+  delay(525);
   digitalWrite(13, 0);
-  Serial.println("starting .....: ");
-  // fader.set(500);
+  mp.begin();
+  // Serial.println("starting .....: ");
 }
 
 // int pos = 0;
 int pos = 0;
 void loop() {
-  // fader.update();
-  if (faderThrottle.shouldUpdate()) {
-    faderTouch.update();
-    faderLevel.update();
-    faderThrottle.reset();
-    Serial.print("touch level: ");Serial.println(faderTouch.read());
-    Serial.print("touched    : ");Serial.println(faderTouch.isTouched());
-    Serial.print("level      : ");Serial.println(faderLevel.read());
+  uint8_t* changed = mp.update();
+  meter.update();
+
+  if (changed[mackie::States::VuMeters]) {
+    uint16_t* meterValues = mp.getVuMeters();
+    meter.set(meterValues);
   }
-  //   if (pos < tlen)
-  //     fader.set(target[pos++]);
-  //   else
-  //     pos = 0;
+
+  if (changed[mackie::States::Command]) {
+    uint16_t* cmds = mp.getCommands();
+    if (cmds[mackie::Commands::Transport_Stop]) {
+      meter.setValue(0);
+    }
+  }
+  // fader.update();
+  // if (faderThrottle.shouldUpdate()) {
+  //   faderThrottle.reset();
+  //   meter.update();
+    // faderTouch.update();
+    // faderLevel.update();
+    // Serial.print("touch level: ");Serial.println(faderTouch.read());
+    // Serial.print("touched    : ");Serial.println(faderTouch.isTouched());
+    // Serial.print("level      : ");Serial.println(faderLevel.read());
+    // if (pos < tlen)
+    //   meter.set(target[pos++]);
+    // else
+    //   pos = 0;
+      // Serial.print("setting target ");
+      // Serial.print(target[pos]);
+  // }
   //   // Serial.print("target: ");Serial.println(target[pos]);
   //   // faderLevel.update();
   //   // Serial.print("plant: ");Serial.println(fader.mPlant);

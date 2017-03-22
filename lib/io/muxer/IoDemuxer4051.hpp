@@ -37,6 +37,10 @@ class Demuxer4051 : public Demuxer {
     writeAll(mValues);
   }
 
+  inline void update() {
+    writeAll(mValues);
+  }
+
   private:
     Ic4051& mIc4051;
 

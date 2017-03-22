@@ -51,7 +51,7 @@ class TouchInput : public ResponsiveAnalogInput {
     } else {
       mValue = touchRead(mPin);
     }
-    
+
     return mValue;
   }
 };
