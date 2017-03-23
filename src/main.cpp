@@ -71,7 +71,7 @@ void loop() {
   if (changed[mackie::States::Command]) {
     uint16_t* cmds = mp.getCommands();
     if (cmds[mackie::Commands::Transport_Stop]) {
-      meter.setValue(0);
+      meter.reset();
     }
   }
   // fader.update();

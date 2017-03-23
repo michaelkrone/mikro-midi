@@ -47,7 +47,7 @@ class Ic595 : public Ic {
       }
     }
 
-    inline void writeAll(uint8_t* values) {
+    inline void writeAll(int* values) {
       for (uint8_t i = mNumIcs; i-- > 0;) {
         shiftOut(mPinMux, mPinShcp, MSBFIRST, values[i]);
       }

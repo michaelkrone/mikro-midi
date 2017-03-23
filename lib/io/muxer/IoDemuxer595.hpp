@@ -53,11 +53,18 @@ class Demuxer595 : public Demuxer {
   values might be an int array like [0, 1, 0, 127, 0, 127, 0, 1]
   we need this to be a single byte like B01010101
   */
-  inline void writeAll(int* values) {
-    for (uint8_t i = 0; i < mIc595.mNumIcs * Ic595::NUM_CHANNELS; i++) {
+  inline void writeAll(const int* values, uint8_t length = 0, bool write = true) {
+    if (length == 0) {
+      length = mIc595.mNumIcs * Ic595::NUM_CHANNELS;
+    }
+
+    for (uint8_t i = 0; i < length; i++) {
       setPin(i, values[i], false);
     }
-    writeAll();
+
+    if (write) {
+      writeAll();
+    }
   }
 
   inline void writeAll() {
@@ -65,11 +72,7 @@ class Demuxer595 : public Demuxer {
       return;
     }
 
-    for (uint8_t i = 0; i < mIc595.mNumIcs * Ic595::NUM_CHANNELS; i++) {
-      mBytes[i] = mValues[i];
-    }
-
-    mIc595.writeAll(mBytes);
+    mIc595.writeAll(mValues);
   }
 
   inline void update() {

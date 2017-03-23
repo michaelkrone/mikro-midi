@@ -62,12 +62,12 @@ class TimecodeShifter {
     }
 
     inline void enable(uint8_t pin) {
-      mDemuxer.writePin(ENABLE_START_INDEX + pin, 0);
-      update();
+      mDemuxer.writePin(ENABLE_START_INDEX + pin, 0, true);
+      // update();
     }
 
     inline void disable(uint8_t pin) {
-      mDemuxer.writePin(ENABLE_START_INDEX + pin, 1);
-      update();
+      mDemuxer.writePin(ENABLE_START_INDEX + pin, 1, true);
+      // update();
     }
   };

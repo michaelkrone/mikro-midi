@@ -39,12 +39,12 @@ public:
   }
 
   inline void invalidate() {
-      mValid = false;
-      mLastReset = 0;
+    mValid = false;
+    mLastReset = 0;
   }
 
   inline void validate() {
-    mValid = true;
+    reset(true);
   }
 
   inline bool isValid() {
@@ -52,8 +52,8 @@ public:
   }
 
   inline void reset(bool valid = true) {
-    mLastReset = millis();
     mValid = valid;
+    mLastReset = millis();
   }
 };
 
