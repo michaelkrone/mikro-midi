@@ -14,9 +14,7 @@ class MackieProtocol {
 		usb_midi_class& mInterface;
 		uint8_t mMode = SYX_NO_MODE;
 		uint8_t mBuffer[SYSEX_BUF_SIZE];
-		uint8_t mChangedStates[STATES_NB];
 		// exposed states
-		uint16_t mErrors[ERRORS_NB];
 		uint16_t mCommandState[COMMANDS_NB];
 		uint16_t mLcdLines[LCD_CHAR_NB];
 		uint16_t mVpotRings[FADER_NB];
@@ -26,6 +24,8 @@ class MackieProtocol {
     uint16_t mSegmentLcd[SEG_DIGIT_NB];
 
   public:
+		uint8_t states[STATES_NB];
+		uint16_t errors[ERRORS_NB];
   /** mode is one of OperationModes */
   MackieProtocol(uint8_t mode)
   	: mInterface(usbMIDI)
@@ -45,9 +45,8 @@ class MackieProtocol {
     sendSysEx(TX_HOST_CONNECT_QUERRY);
   }
 
-  inline uint8_t* update(void) {
+  inline void update(void) {
   	mInterface.read();
-    return mChangedStates;
   }
 
   /*	Error, Command, Lcd, VPotRings, Faders, VuMeters, Timecode, SegmentLcd
@@ -94,46 +93,46 @@ class MackieProtocol {
   }
 
   inline bool hasStateChanged(uint8_t type) {
-    return mChangedStates[type] ? true : false;
+    return this->states[type] ? true : false;
   }
 
   inline uint16_t* getErrors(void) {
-    return mErrors;
+    return this->errors;
   }
 
   inline uint16_t* getCommands(void) {
-    mChangedStates[States::Command] = State::Unchanged;
+    this->states[States::Command] = State::Unchanged;
     return mCommandState;
   }
 
   inline uint16_t* getFaders(void) {
-    mChangedStates[States::Faders] = State::Unchanged;
+    this->states[States::Faders] = State::Unchanged;
     return mFaders;
   }
 
   inline uint16_t* getLcd(void) {
-    mChangedStates[States::Lcd] = State::Unchanged;
+    this->states[States::Lcd] = State::Unchanged;
     return mLcdLines;
   }
 
   inline uint16_t* getVPotRings(void) {
-    mChangedStates[States::VPotRings] = State::Unchanged;
+    this->states[States::VPotRings] = State::Unchanged;
     return mVpotRings;
   }
 
   inline uint16_t* getVuMeters(void) {
-    mChangedStates[States::VuMeters] = State::Unchanged;
+    this->states[States::VuMeters] = State::Unchanged;
     return mVuMeters;
   }
 
   inline uint16_t* getTimecode(void) {
-    mChangedStates[States::Timecode] = State::Unchanged;
+    this->states[States::Timecode] = State::Unchanged;
     return mTimecode;
   }
 
 
   inline uint16_t* getSegmentLcd(void) {
-    mChangedStates[States::SegmentLcd] = State::Unchanged;
+    this->states[States::SegmentLcd] = State::Unchanged;
     return mSegmentLcd;
   }
 
@@ -184,7 +183,7 @@ class MackieProtocol {
       return;
     }
     mCommandState[note] = velocity;
-    mChangedStates[States::Command] = State::Changed;
+    this->states[States::Command] = State::Changed;
   }
 
   inline void noteOffHandler(uint8_t channel, uint8_t note, uint8_t velocity) {
@@ -192,7 +191,7 @@ class MackieProtocol {
       return;
     }
     mCommandState[note] = Off;
-    mChangedStates[States::Command] = State::Changed;
+    this->states[States::Command] = State::Changed;
   }
 
   /*
@@ -214,7 +213,7 @@ class MackieProtocol {
           return;
         }
         mTimecode[pos] = (value & 0x0F);
-        mChangedStates[States::Timecode] = State::Changed;
+        this->states[States::Timecode] = State::Changed;
         return;
       }
 
@@ -225,7 +224,7 @@ class MackieProtocol {
           return;
         }
         mVpotRings[chan] = value & 0x0F;
-        mChangedStates[States::VPotRings] = State::Changed;
+        this->states[States::VPotRings] = State::Changed;
         return;
       }
     }
@@ -243,7 +242,7 @@ class MackieProtocol {
     // mFaders[channel] = (bend >> 7) & 0x7F;
 		// mFaders[channel] = (bend >> 4);
 		mFaders[channel] = FROM_PITCHBEND_SCALE(bend);
-    mChangedStates[States::Faders] = State::Changed;
+    this->states[States::Faders] = State::Changed;
   }
 
   /*
@@ -255,7 +254,7 @@ class MackieProtocol {
       return;
     }
     mVuMeters[chan] = pressure & 0x0F;
-    mChangedStates[States::VuMeters] = State::Changed;
+    this->states[States::VuMeters] = State::Changed;
   }
 
   /**
@@ -310,7 +309,7 @@ class MackieProtocol {
         while(data[++pos] != MIDI_EOX && diplayIndex > MTC_DIGIT_NB) {
           mTimecode[diplayIndex++] = data[pos];
         }
-        mChangedStates[States::Timecode] = State::Changed;
+        this->states[States::Timecode] = State::Changed;
         return;
       }
 
@@ -318,7 +317,7 @@ class MackieProtocol {
       case RX_WRITE_MULTIPLE_7SEG: {
         mSegmentLcd[1] = data[pos + 1];
         mSegmentLcd[0] = data[pos + 2];
-        mChangedStates[States::SegmentLcd] = State::Changed;
+        this->states[States::SegmentLcd] = State::Changed;
         return;
       }
 
@@ -329,15 +328,15 @@ class MackieProtocol {
         while(data[++pos] != MIDI_EOX && displayLen < LCD_CHAR_NB) {
           mLcdLines[displayLen++] = ((char) data[pos]);
         }
-        mChangedStates[States::Lcd] = State::Changed;
+        this->states[States::Lcd] = State::Changed;
         return;
       }
 
       // RX_OFFLINE_STATUS - Logic Only
       case RX_OFFLINE_STATUS_LOGIC: {
         if (mMode == SYX_ID3_LOGIC || mMode == SYX_ID3_LOGIC_XT) {
-          mErrors[Errors::Offline] = Errors::Offline;
-          mChangedStates[States::Error] = State::Changed;
+          this->errors[Errors::Offline] = Errors::Offline;
+          this->states[States::Error] = State::Changed;
         }
       }
     }

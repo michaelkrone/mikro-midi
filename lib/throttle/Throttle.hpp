@@ -51,7 +51,7 @@ public:
     return mValid;
   }
 
-  inline void reset(bool valid = true) {
+  inline void reset(bool valid = false) {
     mValid = valid;
     mLastReset = millis();
   }

@@ -52,7 +52,7 @@ class TimecodeShifter {
         if ((i + 1) % 2 == 0) {
           enable(i - 1);
           disable(i - 1);
-          pin = 0;
+              pin = 0;
         }
       }
     }
@@ -63,11 +63,9 @@ class TimecodeShifter {
 
     inline void enable(uint8_t pin) {
       mDemuxer.writePin(ENABLE_START_INDEX + pin, 0, true);
-      // update();
     }
 
     inline void disable(uint8_t pin) {
       mDemuxer.writePin(ENABLE_START_INDEX + pin, 1, true);
-      // update();
     }
   };

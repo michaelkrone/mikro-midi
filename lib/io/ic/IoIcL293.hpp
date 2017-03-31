@@ -2,21 +2,20 @@
 
 #include "IoDefs.h"
 #include "IoIc.hpp"
+#include "motor/IoMotorDriver.hpp"
 #include "output/IoOutput.hpp"
 
 BEGIN_IO_NAMESPACE
 
 static const uint8_t MotorNb = 2;
 
-class IcL293 : public Ic {
+class IcL293 : public MotorDriver {
   protected:
     Output* mEnable[MotorNb];
     Output* mDriverInput[MotorNb][2];
-
-
-  public:
     bool mEnabled[2];
 
+  public:
     IcL293(Output* enableA12, Output* driverInputA1, Output* driverInputA2,
         Output* enableA34 = NULL, Output* driverInputA3 = NULL, Output* driverInputA4 = NULL) {
       mEnable[0] = enableA12;
@@ -30,6 +29,14 @@ class IcL293 : public Ic {
     }
 
     virtual ~IcL293() {}
+
+    inline bool isEnabled(uint8_t index) {
+      if (index < MotorNb) {
+        return mEnabled[index];
+      }
+
+      return false;
+    }
 
     inline void enable(uint8_t index = 0, int speed = 255) {
       if (mEnable[index] != NULL) {

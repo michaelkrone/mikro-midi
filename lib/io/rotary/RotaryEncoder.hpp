@@ -1,11 +1,11 @@
 #pragma once
 
-#include "RotaryDefs.h"
+#include "IoDefs.h"
 
 #include <IoPin.hpp>
-#include <IoInput.hpp>
+#include <input/IoInput.hpp>
 
-BEGIN_ROTARY_NAMESPACE
+BEGIN_IO_NAMESPACE
 
 class RotaryEncoder {
   private:
@@ -66,17 +66,6 @@ class RotaryEncoder {
     return mValue;
   }
 
-  // inline int read() {
-  //   if (mMux != NULL) {
-  //     mValue = mMux->readPin(mPin);
-  //   } else if (!mAnalog) {
-  //     mValue = DIGITAL_READ_PULLUP(digitalReadFast(mPin), mPullup);
-  //   } else {
-  //     mValue = analogRead(mPin);
-  //   }
-  //   return mValue;
-  // }
-
   inline int read() {
     updateState();
     return mValue;
@@ -90,4 +79,4 @@ class RotaryEncoder {
   }
 };
 
-END_ROTARY_NAMESPACE
+END_IO_NAMESPACE

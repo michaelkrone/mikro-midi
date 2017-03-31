@@ -2,6 +2,7 @@
 
 #include "IoDefs.h"
 #include "IoIc.hpp"
+#include "output/IoOutput.hpp"
 
 BEGIN_IO_NAMESPACE
 
@@ -9,7 +10,7 @@ class Ic595 : public Ic {
   protected:
     ioPin mPinShcp;
     ioPin mPinStcp;
-    ioPin mEnablePin;
+    io::Output* mEnable;
 
   public:
     uint8_t mNumIcs;
@@ -17,8 +18,8 @@ class Ic595 : public Ic {
     ioPin mPinMux;
     uint8_t mChannels;
 
-    Ic595(ioPin pinSHCP, ioPin pinSTCP, ioPin pinDS, uint8_t numIcs = 1, ioPin enablePin = NoCurrentPin)
-        : mPinShcp(pinSHCP), mPinStcp(pinSTCP), mEnablePin(enablePin)
+    Ic595(ioPin pinSHCP, ioPin pinSTCP, ioPin pinDS, uint8_t numIcs = 1, io::Output* enabled = NULL)
+        : mPinShcp(pinSHCP), mPinStcp(pinSTCP), mEnable(enabled)
         , mNumIcs(numIcs), mPinMux(pinDS), mChannels(mNumIcs * NUM_CHANNELS) {
         // define pins as outputs
         pinMode(mPinShcp, OUTPUT);
@@ -42,8 +43,8 @@ class Ic595 : public Ic {
     }
 
     inline void setEnableState(bool enabled) {
-      if (mEnablePin != NoCurrentPin) {
-        digitalWriteFast(mEnablePin, enabled ? LOW : HIGH);
+      if (mEnable != NULL) {
+        mEnable->write(enabled ? LOW : HIGH);
       }
     }
 

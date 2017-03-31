@@ -3,10 +3,11 @@
 #include <Arduino.h>
 
 #include "IoNamespace.h"
-#include "muxer/IoMuxerDefs.h"
 #include "ic/IoIcDefs.h"
+#include "muxer/IoMuxerDefs.h"
 #include "event/IoEventDefs.h"
 #include "pid/IoPidDefs.h"
+#include "rotary/RotaryDefs.h"
 
 BEGIN_IO_NAMESPACE
 

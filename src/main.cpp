@@ -11,7 +11,7 @@ mackie::MackieProtocol mp(mackie::OperationMode_MackieControl);
 // #include <input/IoTouchInput.hpp>
 // #include <input/IoResponsiveAnalogInput.hpp>
 // #include <ic/IoIcL293.hpp>
-// #include <pid/IoPidController.hpp>
+#include <pid/IoPidController.hpp>
 
 // #include <muxer/IoMuxer4051.hpp>
 #include <muxer/IoDemuxer595.hpp>
@@ -57,23 +57,26 @@ void setup() {
   // Serial.println("starting .....: ");
 }
 
-// int pos = 0;
-int pos = 0;
-void loop() {
-  uint8_t* changed = mp.update();
-  meter.update();
+uint16_t* meterValues;
+uint16_t* cmds;
 
-  if (changed[mackie::States::VuMeters]) {
-    uint16_t* meterValues = mp.getVuMeters();
-    meter.set(meterValues);
+void loop() {
+  mp.update();
+
+  if (mp.states[mackie::States::VuMeters]) {
+    meterValues = mp.getVuMeters();
+    meter.setValue(meterValues[0]);
   }
 
-  if (changed[mackie::States::Command]) {
-    uint16_t* cmds = mp.getCommands();
+  if (mp.states[mackie::States::Command]) {
+    cmds = mp.getCommands();
     if (cmds[mackie::Commands::Transport_Stop]) {
       meter.reset();
     }
   }
+
+  meter.update();
+
   // fader.update();
   // if (faderThrottle.shouldUpdate()) {
   //   faderThrottle.reset();

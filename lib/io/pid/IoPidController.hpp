@@ -4,6 +4,7 @@
 
 #include "IoDefs.h"
 #include "input/IoResponsiveAnalogInput.hpp"
+// #include "motor/IoMotorDriver.hpp"
 #include "ic/IoIcL293.hpp"
 
 BEGIN_IO_NAMESPACE
@@ -11,7 +12,7 @@ BEGIN_IO_NAMESPACE
 class PidController {
   private:
     ResponsiveAnalogInput& mInput;
-    IcL293& mIc;
+    MotorDriver& mIc;
     uint8_t mIcIndex;
     int mTarget;
     uint16_t mMin, mMax;
@@ -95,7 +96,7 @@ class PidController {
 
       mThrottle.reset(false);
 
-      if (!mIc.mEnabled[mIcIndex]) {
+      if (!mIc.isEnabled(mIcIndex)) {
         mIc.enable(mIcIndex);
       }
 
