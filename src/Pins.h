@@ -27,26 +27,28 @@ static const uint8_t DISPLAY_CHANNEL1_SCL_PIN = 29;
 
 // command button and led pins
 
-// channel 0 - leds - demuxer1
+// channel 0
+
+// channel 0 - leds - ledDemuxer1
 static const uint8_t PinLed_Channel0_Button_Rec = 0;
 static const uint8_t PinLed_Channel0_Button_Solo = 1;
 static const uint8_t PinLed_Channel0_Button_Mute = 2;
 static const uint8_t PinLed_Channel0_Button_Select = 3;
 
-// channel 1 - leds - demuxer1
-static const uint8_t PinLed_Channel1_Button_Rec = 4;
-static const uint8_t PinLed_Channel1_Button_Solo = 5;
-static const uint8_t PinLed_Channel1_Button_Mute = 6;
-static const uint8_t PinLed_Channel1_Button_Select = 7;
-
-// channel 0 - buttons - demuxer1
+// channel 0 - buttons - buttonMuxer1
 static const uint8_t PinButton_Channel0_Button_Rec = 0;
 static const uint8_t PinButton_Channel0_Button_Solo = 1;
 static const uint8_t PinButton_Channel0_Button_Mute = 2;
 static const uint8_t PinButton_Channel0_Button_Select = 3;
 static const uint8_t PinButton_Channel0_Vpot_Switch = 4;
 
-// channel 1 - buttons - demuxer1
+// channel 1 - leds - ledDemuxer1
+static const uint8_t PinLed_Channel1_Button_Rec = 4;
+static const uint8_t PinLed_Channel1_Button_Solo = 5;
+static const uint8_t PinLed_Channel1_Button_Mute = 6;
+static const uint8_t PinLed_Channel1_Button_Select = 7;
+
+// channel 1 - buttons - demuxer2
 static const uint8_t PinButton_Channel1_Button_Rec = 1;
 static const uint8_t PinButton_Channel1_Button_Solo = 9;
 static const uint8_t PinButton_Channel1_Button_Mute = 17;

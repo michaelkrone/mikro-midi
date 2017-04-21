@@ -3,6 +3,8 @@
    mikroMIDI main
 */
 
+#define ANALOG_MAX 4096
+
 #include <MackieProtocol.hpp>
 mackie::MackieProtocol mp(mackie::OperationMode_MackieControl);
 
@@ -14,27 +16,28 @@ mackie::MackieProtocol mp(mackie::OperationMode_MackieControl);
 #include <pid/IoPidController.hpp>
 
 // #include <muxer/IoMuxer4051.hpp>
-#include <muxer/IoDemuxer595.hpp>
+#include <ic/IoIcL293.hpp>
+#include <motor/IoMotorL9110.hpp>
 
 #include <ic/IoIc595.hpp>
 #include <muxer/IoDemuxer595.hpp>
-#include "hardware/vu-meter/VuChannelMeter.hpp"
+#include "hardware/vu-meter/ChannelVuMeter.hpp"
 
-io::Ic595 ic595(31, 30, 29, 2);
-io::Demuxer595 demuxer(ic595, 0, false);
-
-VuChannelMeter meter(demuxer, 0);
+// io::Ic595 ic595(31, 30, 29, 2);
+// io::Demuxer595 demuxer(ic595, 0, false);
+//
+// VuChannelMeter meter(demuxer, 0);
 
 // io::Ic4051 ic4051(14, 15, 16, 22, 8, 100);
 // io::Demuxer4051 demuxer(ic4051, true);
 
-// io::ResponsiveAnalogInput faderLevel(14, true);
 // io::TouchInput faderTouch(15);
-// io::Output enable(22);
-// io::Output motorA(20, true);
-// io::Output motorB(21, true);
-// io::IcL293 hBridge(&enable, &motorA, &motorB);
-// io::PidController fader(faderLevel, hBridge, 0, 1, 4096);
+io::Output speed(23, true);
+io::Output direction(22, true);
+io::MotorL9110 driver(speed, direction);
+// io::IoMotorL293 driver(icL293);
+io::ResponsiveAnalogInput faderLevel(14, true);
+io::PidController fader(faderLevel, driver, 2);
 
 throttle::Throttle faderThrottle(5);
 
@@ -42,83 +45,47 @@ int tlen = 10;
 int target[] = {12, 11, 10, 9, 8, 5, 6, 7, 8, 9};
 
 void setup() {
-  // analogWriteResolution(12);
-  // analogWriteFrequency(20, 8789.062);
-  // analogWriteFrequency(21, 8789.062);
-  // hBridge.stopAll();
+  analogWriteResolution(12);
+  analogWriteFrequency(23, 8789.062);
+  analogWriteFrequency(22, 8789.062);
 
   // Serial.begin(9600);
-  delay(225);
-  pinMode(13, OUTPUT);
-  digitalWrite(13, 1);
-  delay(525);
-  digitalWrite(13, 0);
-  mp.begin();
   // Serial.println("starting .....: ");
+  delay(225);
+
+  fader.setValue(0);
+  mp.begin();
 }
 
-uint16_t* meterValues;
 uint16_t* cmds;
+uint16_t* meterValues;
+uint16_t* faderValues;
 
 void loop() {
+  // read data
   mp.update();
-
-  if (mp.states[mackie::States::VuMeters]) {
-    meterValues = mp.getVuMeters();
-    meter.setValue(meterValues[0]);
-  }
-
-  if (mp.states[mackie::States::Command]) {
-    cmds = mp.getCommands();
-    if (cmds[mackie::Commands::Transport_Stop]) {
-      meter.reset();
-    }
-  }
-
-  meter.update();
-
-  // fader.update();
-  // if (faderThrottle.shouldUpdate()) {
-  //   faderThrottle.reset();
-  //   meter.update();
-    // faderTouch.update();
-    // faderLevel.update();
-    // Serial.print("touch level: ");Serial.println(faderTouch.read());
-    // Serial.print("touched    : ");Serial.println(faderTouch.isTouched());
-    // Serial.print("level      : ");Serial.println(faderLevel.read());
-    // if (pos < tlen)
-    //   meter.set(target[pos++]);
-    // else
-    //   pos = 0;
-      // Serial.print("setting target ");
-      // Serial.print(target[pos]);
-  // }
-  //   // Serial.print("target: ");Serial.println(target[pos]);
-  //   // faderLevel.update();
-  //   // Serial.print("plant: ");Serial.println(fader.mPlant);
-  //   // hBridge.enable(0);
-  //   // Serial.print("down: 2500");
-  //   // hBridge.down(0, 2800);
-  //   // delay(1000);
-  //   // hBridge.stop(0);
-  //   // hBridge.enable(0);
-  //   // Serial.print("up: 2000");
-  //   // hBridge.up(0, 2700);
-  //   // delay(2000);
-  //   // hBridge.stop(0);
-  // //   // fader.update();
   //
-  // //
-  // //   // digitalWrite(13, 1);
-  // //   for (int i = 0; i < tlen; i++) {
-  // //     Serial.println("________________");Serial.println(target[i]);
-  // //     fader.moveTo(target[i]);
-  // //     Serial.print("level: ");Serial.println(faderLevel.read());
-  // //     Serial.println("________________");
-  // //     delay(1000);
-  // //   }
-  // //     // fader.set(target[i]);
-  // //     // hBridge.disable(0);
-  // //   // digitalWrite(13, 0);
+  // if (mp.states[mackie::States::VuMeters]) {
+  //   meterValues = mp.getVuMeters();
+  //   meter.setValue(meterValues[0]);
   // }
+  //
+  if (mp.states[mackie::States::Faders]) {
+    faderValues = mp.getFaders();
+    fader.setValue(faderValues[0]);
+  }
+  //
+  // if (mp.states[mackie::States::Command]) {
+  //   cmds = mp.getCommands();
+  //   if (cmds[mackie::Commands::Transport_Stop]) {
+  //     meter.reset();
+  //   }
+  // }
+
+  // write updated data
+
+  fader.update();
+  // Serial.println(faderLevel.read());
+  // delay(1000);
+  // meter.update();
 }

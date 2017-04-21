@@ -4,7 +4,7 @@
 
 #include "IoDefs.h"
 #include "input/IoResponsiveAnalogInput.hpp"
-// #include "motor/IoMotorDriver.hpp"
+#include "motor/IoMotorDriver.hpp"
 #include "ic/IoIcL293.hpp"
 
 BEGIN_IO_NAMESPACE
@@ -13,12 +13,11 @@ class PidController {
   private:
     ResponsiveAnalogInput& mInput;
     MotorDriver& mIc;
-    uint8_t mIcIndex;
     int mTarget;
     uint16_t mMin, mMax;
     float mMinState, mMaxState;
     throttle::Throttle mThrottle;
-    uint16_t mMaxResolution;
+    uint16_t mAnalogMax;
     float mPterm, mDterm, mIterm;
     float mPgain, mIgain, mDgain;
     float mDstate, mPlant;
@@ -39,27 +38,26 @@ class PidController {
       mDstate = faderPosition;
       mPlant = mPterm + mIterm - mDterm;
 
-      if (mPlant > mMaxResolution) {
-        mPlant = mMaxResolution;
-      } else if (mPlant < -mMaxResolution) {
-        mPlant = -mMaxResolution;
+      if (mPlant > mAnalogMax) {
+        mPlant = mAnalogMax;
+      } else if (mPlant < -mAnalogMax) {
+        mPlant = -mAnalogMax;
       }
     }
 
   public:
     PidController(
         ResponsiveAnalogInput& faderLevel,
-        IcL293& icL293, uint8_t icIndex = 0,
-        uint8_t defaultTimeoutMs = 1, uint16_t analogResolution = 255,
+        MotorDriver& driver,
+        uint8_t defaultTimeoutMs = 10, uint16_t analogMax = ANALOG_MAX,
         uint16_t minFaderValue = DefaultFaderMin, uint16_t maxFaderValue = DefaultFaderMax,
         float gainP = DefaultGainP, float gainI = DefaultGainI, float gainD = DefaultGainD)
     : mInput(faderLevel)
-    , mIc(icL293)
-    , mIcIndex(icIndex)
+    , mIc(driver)
     , mMin(minFaderValue)
     , mMax(maxFaderValue)
     , mThrottle(defaultTimeoutMs)
-    , mMaxResolution(analogResolution)
+    , mAnalogMax(analogMax)
     , mPgain(gainP)
     , mIgain(gainI)
     , mDgain(gainD) {
@@ -71,7 +69,7 @@ class PidController {
 
     virtual ~PidController() {}
 
-    inline void set(float value) {
+    inline void setValue(float value) {
       if (value > mMax) {
         mTarget = mMax;
       } else if (value < mMin) {
@@ -96,17 +94,15 @@ class PidController {
 
       mThrottle.reset(false);
 
-      if (!mIc.isEnabled(mIcIndex)) {
-        mIc.enable(mIcIndex);
-      }
-
+      mIc.enable();
       if (mPlant > 0 && faderValue < mMax) {
-        mIc.up(mIcIndex, mPlant);
+        digitalWrite(13, LOW);
+        mIc.up(mPlant);
       } else if (mPlant < 0 && faderValue > mMin) {
-        mIc.down(mIcIndex, -mPlant);
+        mIc.down(-mPlant);
       } else {
-        mIc.stop(mIcIndex);
-        mIc.disable(mIcIndex);
+        mIc.stop();
+        mIc.disable();
         mThrottle.validate();
       }
     }
