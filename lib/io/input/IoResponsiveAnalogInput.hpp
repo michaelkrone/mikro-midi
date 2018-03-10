@@ -14,6 +14,8 @@ class ResponsiveAnalogInput : public Input {
     //   increase this to lessen the amount of easing (such as 0.1) and make the responsive values more responsive
     //   but doing so may cause more noise to seep through if sleep is not enabled
 
+// @TODO make ioPins to IoInputs
+
   ResponsiveAnalogInput(
         ioPin pin, bool sleepEnable = false,
         float snapMultiplier = 0.1, int resolution = AnalogResolution)

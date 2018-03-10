@@ -10,6 +10,8 @@ BEGIN_IO_NAMESPACE
 #define SSD1306_CMD_DISPLAY_ON 0xAF // --turn on oled panel
 #define SSD1306_SWAP(a, b) { int16_t t = a; a = b; b = t; }
 
+// @TODO make ioPins to IoOutputs
+
 class DisplayHTDSDI96 : public Adafruit_GFX {
   protected:
   	ioPin mPinSDA;

@@ -258,3 +258,139 @@
 //   // //   // digitalWrite(13, 0);
 //   // }
 // }
+
+
+/*
+   mikroMIDI main
+*/
+
+#define ANALOG_MAX 4096
+
+// #include <MackieProtocol.hpp>
+// mackie::MackieProtocol mp(mackie::OperationMode_MackieControl);
+
+#include <Throttle.hpp>
+#include <output/IoOutput.hpp>
+// #include <input/IoTouchInput.hpp>
+// #include <input/IoResponsiveAnalogInput.hpp>
+// #include <ic/IoIcL293.hpp>
+#include <pid/IoPidController.hpp>
+
+// #include <muxer/IoMuxer4051.hpp>
+// #include <ic/IoIcL293.hpp>
+#include <ic/IoIcL9110.hpp>
+#include <motor/IoMotorL9110.hpp>
+
+// #include <ic/IoIc595.hpp>
+// #include <muxer/IoDemuxer595.hpp>
+// #include "hardware/vu-meter/ChannelVuMeter.hpp"
+
+// io::Ic595 ic595(31, 30, 29, 2);
+// io::Demuxer595 demuxer(ic595, 0, false);
+//
+// VuChannelMeter meter(demuxer, 0);
+
+// io::Ic4051 ic4051(14, 15, 16, 22, 8, 100);
+// io::Demuxer4051 demuxer(ic4051, true);
+
+// io::TouchInput faderTouch(15);
+io::Output a(23, true);
+io::Output b(22, true);
+// io::IoMotorL293 driver(icL293);
+io::IcL9110 icL9110(&a, &b);
+io::MotorL9110 driver(icL9110);
+io::ResponsiveAnalogInput faderLevel(14, true);
+io::PidController fader(faderLevel, driver);
+
+throttle::Throttle t1(500);
+throttle::Throttle t2(3000);
+
+uint16_t values[7] = {250, 100, 850, 800, 1000, 500};
+uint8_t i = 0;
+
+void setup() {
+  analogWriteResolution(12);
+  analogWriteFrequency(23, 8789.062);
+  analogWriteFrequency(22, 8789.062);
+
+  Serial.begin(9600);
+  delay(225);
+  pinMode(13, OUTPUT);
+  digitalWrite(13, HIGH);
+  // fader.setValue(0);
+  delay(500);
+  digitalWrite(13, LOW);
+  Serial.println("starting .....: ");
+  // mp.begin();
+}
+
+uint16_t* cmds;
+uint16_t* meterValues;
+uint16_t* faderValues;
+int sum = 0;
+
+void loop() {
+  // digitalWrite(13, HIGH);
+  // // fader.setValue(0);
+  // delay(500);
+  // digitalWrite(13, LOW);
+  // delay(500);
+  // read data
+  // mp.update();
+
+  //
+  // if (mp.states[mackie::States::VuMeters]) {
+  //   meterValues = mp.getVuMeters();
+  //   meter.setValue(meterValues[0]);
+  // }
+  //
+  // if (mp.states[mackie::Stat000000005es[0]);
+  // }
+  //
+  // if (mp.states[mackie::States::Command]) {
+  //   cmds = mp.getCommands();
+  //   if (cmds[mackie::Commands::Transport_Stop]) {
+  //     meter.reset();
+  //   }
+  // }
+
+  // write updated data
+fader.update();
+
+  if (t1.shouldUpdate()) {
+    t1.reset();
+    Serial.print("faderLevel: ");
+    Serial.print(faderLevel.read());
+    Serial.print("/");
+    Serial.println(values[i - 1]);
+  }
+
+  if (t2.shouldUpdate()) {
+    t2.reset();
+    if (i > 0) {
+      Serial.println("------------------------");
+      Serial.print("Q:");
+      sum += abs(faderLevel.read() - values[i - 1]);
+      Serial.print(faderLevel.read() - values[i - 1]);
+      Serial.println("------------------------");
+    }
+
+    if (i >= 6) {
+      Serial.println("****************************");
+      Serial.print("Q:");
+      Serial.println(sum / 6);
+      Serial.println("****************************");
+
+      i = 0;
+      sum = 0;
+    }
+
+    Serial.println("------------------------");
+    Serial.print("new target:");
+    Serial.println(values[i]);
+    Serial.println("------------------------");
+    fader.setValue(values[i++]);
+  }
+  // delay(1000);
+  // meter.update();
+}

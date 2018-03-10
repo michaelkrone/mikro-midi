@@ -17,6 +17,8 @@ class Ic4051 : public Ic {
   uint8_t mChannels;
   ioPin mPinMux;
 
+// @TODO make ioPins to IoOutputs
+
   Ic4051(ioPin pinS0, ioPin pinS1, ioPin pinS2, ioPin pinMux, uint8_t numChannels = 8,
         uint32_t bounceDelay = DefaultBounceDelayMicros_4051, ioPin enablePin = NoCurrentPin)
       : mPinS0(pinS0), mPinS1(pinS1), mPinS2(pinS2), mBounceDelay(bounceDelay)

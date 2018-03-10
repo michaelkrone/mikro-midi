@@ -1,20 +1,20 @@
 #pragma once
 
 #include "IoDefs.h"
-#include "output/IoOutput.hpp"
+#include "ic/IoIcL9110.hpp"
 #include "motor/IoMotorDriver.hpp"
 
 BEGIN_IO_NAMESPACE
 
 class MotorL9110 : public MotorDriver {
   protected:
-    Output& mSpeed;
-    Output& mDirection;
+    IcL9110& mIcL9110;
+    uint8_t mIndex;
 
   public:
-    MotorL9110(Output& speed, Output& direction)
-      : mSpeed(speed)
-      , mDirection(direction) {}
+    MotorL9110(IcL9110& icL9110, uint8_t index = 0)
+      : mIcL9110(icL9110)
+      , mIndex(index) {}
 
     virtual ~MotorL9110() {}
 
@@ -23,23 +23,19 @@ class MotorL9110 : public MotorDriver {
     inline void disable() {}
 
     inline void up(int speed = ANALOG_MAX) {
-      stop();
-      mDirection.write(speed);
+      mIcL9110.up(mIndex, speed);
     }
 
     inline void down(int speed = ANALOG_MAX) {
-      stop();
-      mSpeed.write(speed);
+      mIcL9110.down(mIndex, speed);
     }
 
     inline void stop() {
-      mSpeed.write(LOW);
-      mDirection.write(LOW);
+      mIcL9110.stop(mIndex);
     }
 
     inline void halt() {
-      mSpeed.write(ANALOG_MAX);
-      mDirection.write(ANALOG_MAX);
+      mIcL9110.halt(mIndex);
     }
   };
 

@@ -15,27 +15,28 @@ class PidController {
     MotorDriver& mIc;
     int mTarget;
     uint16_t mMin, mMax;
-    float mMinState, mMaxState;
     throttle::Throttle mThrottle;
     uint16_t mAnalogMax;
     float mPterm, mDterm, mIterm;
     float mPgain, mIgain, mDgain;
-    float mDstate, mPlant;
+    float mMinState, mMaxState;
+    float mDstate, mIstate, mPlant;
 
-    inline void calculateDrive(float faderError, float faderPosition) {
+    inline void updatePIDIntegralState(float error, float position) {
       // calculate the proportional term
-      mPterm = mPgain * faderError;
+      mPterm = mPgain * error;
+      mIstate += error;
 
-      // calculate the integral state with appropriate limiting
-      mIterm = mIgain * faderError;
-      if (mIterm < mMinState) {
-        mIterm = mMinState;
-      } else if (mIterm > mMaxState) {
-        mIterm = mMaxState;
+      // calc ulate the integral state with appropriate limiting
+      if (mIstate > mMaxState) {
+        mIstate = mMaxState;
+      } else if (mIstate < mMinState) {
+        mIstate = mMinState;
       }
 
-      mDterm = mDgain * (faderPosition - mDstate);
-      mDstate = faderPosition;
+      mIterm = mIgain * mIstate;
+      mDterm = mDgain * (position - abs(mDstate));
+      mDstate = position;
       mPlant = mPterm + mIterm - mDterm;
 
       if (mPlant > mAnalogMax) {
@@ -45,13 +46,18 @@ class PidController {
       }
     }
 
+    inline void updatePID(float error, float position) {
+      updatePIDIntegralState(error, position);
+    }
+
   public:
     PidController(
         ResponsiveAnalogInput& faderLevel,
         MotorDriver& driver,
-        uint8_t defaultTimeoutMs = 10, uint16_t analogMax = ANALOG_MAX,
         uint16_t minFaderValue = DefaultFaderMin, uint16_t maxFaderValue = DefaultFaderMax,
-        float gainP = DefaultGainP, float gainI = DefaultGainI, float gainD = DefaultGainD)
+        uint8_t defaultTimeoutMs = 5, uint16_t analogMax = DefaultAnalogMax,
+        float gainP = DefaultGainP, float gainI = DefaultGainI, float gainD = DefaultGainD,
+        float minIntegralState = -900000, float maxIntegralState = 900000)
     : mInput(faderLevel)
     , mIc(driver)
     , mMin(minFaderValue)
@@ -60,11 +66,14 @@ class PidController {
     , mAnalogMax(analogMax)
     , mPgain(gainP)
     , mIgain(gainI)
-    , mDgain(gainD) {
+    , mDgain(gainD)
+    , mMinState (minIntegralState)
+    , mMaxState (maxIntegralState)
+    {
       mTarget = 0.0;
       mPlant = 0.0;
-      mMinState = -1500;
-      mMaxState = 1500;
+      mDstate = 0.0;
+      mIstate = 0.0;
     }
 
     virtual ~PidController() {}
@@ -77,6 +86,7 @@ class PidController {
       } else {
         mTarget = (int)value;
       }
+      mIstate = 0;
       mThrottle.invalidate();
     }
 
@@ -88,23 +98,33 @@ class PidController {
         return;
       }
 
-      // update plant value
-      int faderValue = mInput.update();
-      calculateDrive(mTarget - faderValue, faderValue);
-
       mThrottle.reset(false);
 
+      // update plant value
+      int faderValue = mInput.update();
+      float error = (float) (mTarget - faderValue);
+
+      if (error == 0) {
+        stop();
+        return;
+      }
+
+      updatePID(error, faderValue);
       mIc.enable();
+
       if (mPlant > 0 && faderValue < mMax) {
-        digitalWrite(13, LOW);
         mIc.up(mPlant);
       } else if (mPlant < 0 && faderValue > mMin) {
         mIc.down(-mPlant);
       } else {
-        mIc.stop();
-        mIc.disable();
-        mThrottle.validate();
+        stop();
       }
+    }
+
+    inline void stop() {
+      mIc.stop();
+      mIc.disable();
+      mThrottle.validate();
     }
 };
 

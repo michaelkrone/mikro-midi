@@ -6,6 +6,8 @@
 BEGIN_IO_NAMESPACE
 
 class BouncedInput : public Input {
+  
+  // @TODO make ioPins to IoInputs
   public:
   BouncedInput(ioPin pin, bool pullup = true,
         unsigned long interval = BounceIntervalDefault, DebounceMode bounceMode = DebounceModeStable)

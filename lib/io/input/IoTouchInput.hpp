@@ -12,6 +12,8 @@ class TouchInput : public ResponsiveAnalogInput {
     uint16_t mCapSense;
     int mTouchVal;
 
+// @TODO make ioPins to IoInputs
+
   public:
   TouchInput(ioPin pin, uint16_t capsense = DefaultCapsense)
     : TouchInput(NULL, pin) {}

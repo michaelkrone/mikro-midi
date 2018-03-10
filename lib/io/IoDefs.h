@@ -10,14 +10,14 @@
 #include "pid/IoPidDefs.h"
 #include "rotary/RotaryDefs.h"
 
-BEGIN_IO_NAMESPACE
-
 #ifndef ANALOG_MAX
 #define ANALOG_MAX 255
 #endif
 
-#define MAX_VAL(a, b) (a > b ? b : a)
-#define MIN_VAL(a, b) (a < b ? b : a)
+BEGIN_IO_NAMESPACE
+
+#define MIN_VAL(a, b) (a > b ? b : a)
+#define MAX_VAL(a, b) (a < b ? b : a)
 
 typedef uint8_t ioPin;
 

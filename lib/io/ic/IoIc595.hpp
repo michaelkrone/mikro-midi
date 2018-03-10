@@ -18,6 +18,8 @@ class Ic595 : public Ic {
     ioPin mPinMux;
     uint8_t mChannels;
 
+// @TODO make ioPins to IoOutputs
+
     Ic595(ioPin pinSHCP, ioPin pinSTCP, ioPin pinDS, uint8_t numIcs = 1, io::Output* enabled = NULL)
         : mPinShcp(pinSHCP), mPinStcp(pinSTCP), mEnable(enabled)
         , mNumIcs(numIcs), mPinMux(pinDS), mChannels(mNumIcs * NUM_CHANNELS) {

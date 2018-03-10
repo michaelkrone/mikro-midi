@@ -25,7 +25,7 @@ public:
     if (index >= MAX_THROTTLES) {
       return false;
     }
-    return (millis() - mItems[index].lastReset) >= mItems[index].threshold;
+    return (millis() - mItems[index].lastReset) > mItems[index].threshold;
   }
 
   inline void reset(uint8_t index) {

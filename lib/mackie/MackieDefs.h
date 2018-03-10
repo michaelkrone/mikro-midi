@@ -301,13 +301,13 @@ enum Errors {
 };
 static const uint8_t ERRORS_NB = 2;
 
-#define MAX_VAL(a, b) (a > b ? b : a)
+#define MIN_VAL(a, b) (a > b ? b : a)
 
 #define TO_SYSBYTE(b) (b + '0')
 
 #define TO_PITCHBEND_SCALE(value) ((float) (value - FADER_MIN) / (FADER_MAX - FADER_MIN)) * PITCHBEND_MAX
 
-#define FROM_PITCHBEND_SCALE(x) MAX_VAL(\
+#define FROM_PITCHBEND_SCALE(x) MIN_VAL(\
 	((float) (((mackie::FADER_MAX - mackie::FADER_MIN) * (x - mackie::PITCHBEND_MIN))\
     / (mackie::PITCHBEND_MAX - mackie::PITCHBEND_MIN)) + mackie::FADER_MIN)\
 	, 1023)

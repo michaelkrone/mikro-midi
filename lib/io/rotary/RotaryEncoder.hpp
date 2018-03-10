@@ -66,9 +66,22 @@ class RotaryEncoder {
     return mValue;
   }
 
+  inline void setValue(int value) {
+    mValue = value;
+    mPrevValue = value;
+  }
+
+  inline void reset() {
+    setValue(0);
+  }
+
   inline int read() {
     updateState();
     return mValue;
+  }
+
+  inline void update() {
+    updateState();
   }
 
   inline bool cw() {
