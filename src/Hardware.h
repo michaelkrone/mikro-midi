@@ -5,39 +5,32 @@
 #include <muxer/IoDemuxer595.hpp>
 #include <muxer/IoMuxer4051.hpp>
 
-#include "Defs.h"
+#include "Command.h"
 
-// init ic's
+/*
+  Init IC's
+*/
 
 // 4051's
-io::Ic4051 ic4051_1(IC_4051_1_S0, IC_4051_1_S1, IC_4051_1_S2, IC_4051_1_MUX, 5, 100);
-io::Ic4051 ic4051_2(IC_4051_1_S0, IC_4051_1_S1, IC_4051_1_S2, IC_4051_2_MUX, 2, 100);
+// io::Ic4051 ic4051_0(IC_4051_0_S0, IC_4051_0_S1, IC_4051_0_S2, IC_4051_0_MUX, 5, 100);
+// io::Ic4051 ic4051_1(IC_4051_0_S0, IC_4051_0_S1, IC_4051_0_S2, IC_4051_1_MUX, 2, 100);
 
 // init 4051 muxers
-io::Muxer4051 muxer1(ic4051_1);
-io::Muxer4051 muxer2(ic4051_2);
+// io::Muxer4051 muxer1(ic4051_0);
+// io::Muxer4051 muxer2(ic4051_1);
 
-// 595's
-io::Ic595 ic595_1(IC_595_1_SHCP, IC_595_1_STCP, IC_595_1_DS);
-io::Ic595 ic595_2(IC_595_1_SHCP, IC_595_1_STCP, IC_595_1_DS);
+// 595's and demuxers
+io::Ic595 ic595_VuMeter(IC_595_0_SHCP, IC_595_0_STCP, IC_595_0_DS);
+// io::Ic595 ic595_0_1(IC_595_0_SHCP, IC_595_0_STCP, IC_595_0_DS);
 
-// init 595 demuxers
-
-// demuxer1 -> Channel0, Channel1
-io::Demuxer595 demuxer1(ic595_1);
-// io::Demuxer595 demuxer2(ic595_2);
-
-// some outputs
+// demuxer0 -> Channel0
+io::Demuxer595 demuxer_0_1(ic595_0_1);
 
 /*
   Command LED's
 */
 
-// {mackie::Commands::Channel0_Button_Mute, io::Output(&demuxer1, PinLed_Channel0_Button_Mute)},
-
-// CommandOutputMap ledsChannel0Channel1[8] = ;
-
-Commands<8> leds1 = {demuxer1, {
+Commands<8> leds1 = {demuxer_0_1, {
   {mackie::Commands::Channel0_Button_Mute, PinLed_Channel0_Button_Mute},
   {mackie::Commands::Channel0_Button_Solo, PinLed_Channel0_Button_Solo},
   {mackie::Commands::Channel0_Button_Rec, PinLed_Channel0_Button_Rec},

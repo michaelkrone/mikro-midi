@@ -58,7 +58,7 @@ class TimecodeShifter {
     }
 
     inline void update() {
-      mDemuxer.writeAll();
+      mDemuxer.update();
     }
 
     inline void enable(uint8_t pin) {

@@ -7,6 +7,8 @@
 BEGIN_IO_NAMESPACE
 
 class Ic595 : public Ic {
+  private:
+    bool mEnabled;
   protected:
     ioPin mPinShcp;
     ioPin mPinStcp;
@@ -18,10 +20,12 @@ class Ic595 : public Ic {
     ioPin mPinMux;
     uint8_t mChannels;
 
-// @TODO make ioPins to IoOutputs
-
-    Ic595(ioPin pinSHCP, ioPin pinSTCP, ioPin pinDS, uint8_t numIcs = 1, io::Output* enabled = NULL)
-        : mPinShcp(pinSHCP), mPinStcp(pinSTCP), mEnable(enabled)
+    // SHCP or SRCK
+    // STCP or RCK
+    // DS or SER IN
+    // enableOutput: OE or G
+    Ic595(ioPin pinSHCP, ioPin pinSTCP, ioPin pinDS, uint8_t numIcs = 1, io::Output* enableOutput = NULL)
+         : mPinShcp(pinSHCP), mPinStcp(pinSTCP), mEnable(enableOutput)
         , mNumIcs(numIcs), mPinMux(pinDS), mChannels(mNumIcs * NUM_CHANNELS) {
         // define pins as outputs
         pinMode(mPinShcp, OUTPUT);
@@ -32,6 +36,7 @@ class Ic595 : public Ic {
         digitalWriteFast(mPinShcp, LOW);
         digitalWriteFast(mPinStcp, LOW);
         digitalWriteFast(mPinMux, LOW);
+        disable();
     }
 
     virtual ~Ic595() {}
@@ -45,8 +50,9 @@ class Ic595 : public Ic {
     }
 
     inline void setEnableState(bool enabled) {
-      if (mEnable != NULL) {
+      if (mEnabled && mEnable != NULL) {
         mEnable->write(enabled ? LOW : HIGH);
+        mEnabled = enabled;
       }
     }
 

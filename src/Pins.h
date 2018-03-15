@@ -7,18 +7,18 @@
 
 // 595 demuxers
 
-static const uint8_t IC_595_1_SHCP = 28;
-static const uint8_t IC_595_1_STCP = 27;
-static const uint8_t IC_595_1_DS = 26;
+static const uint8_t IC_595_0_SHCP = 28;
+static const uint8_t IC_595_0_STCP = 27;
+static const uint8_t IC_595_0_DS = 26;
 
 // 4051 muxers
 
-static const uint8_t IC_4051_1_S0 = 31;
-static const uint8_t IC_4051_1_S1 = 32;
-static const uint8_t IC_4051_1_S2 = 33;
+static const uint8_t IC_4051_0_S0 = 31;
+static const uint8_t IC_4051_0_S1 = 32;
+static const uint8_t IC_4051_0_S2 = 33;
 
-static const uint8_t IC_4051_1_MUX = 14;
-static const uint8_t IC_4051_2_MUX = 15;
+static const uint8_t IC_4051_0_MUX = 14;
+static const uint8_t IC_4051_1_MUX = 15;
 
 // displays
 
@@ -32,7 +32,7 @@ static const uint8_t DISPLAY_CHANNEL1_SCL_PIN = 29;
 // channel 0 - leds - ledDemuxer1
 static const uint8_t PinLed_Channel0_Button_Rec = 0;
 static const uint8_t PinLed_Channel0_Button_Solo = 1;
-static const uint8_t PinLed_Channel0_Button_Mute = 2;
+static const uint8_t PinLed_Channel0_Button_Mute = 2;``
 static const uint8_t PinLed_Channel0_Button_Select = 3;
 
 // channel 0 - buttons - buttonMuxer1

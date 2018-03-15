@@ -15,14 +15,18 @@ class Demuxer595 : public Demuxer {
     uint8_t* mBytes;
 
   public:
-    Demuxer595(Ic595& ic595, uint32_t writeDelay = 0, bool autoWrite = true)
+    Demuxer595(Ic595& ic595, bool autoWrite = true)
       : Demuxer(ic595.mNumIcs, false, 0), mIc595(ic595), mAutoWrite(autoWrite), mChanged(false) {
-        int len = (mIc595.mNumIcs * Ic595::NUM_CHANNELS) * sizeof(uint8_t);
+        int len = mIc595.mChannels * sizeof(uint8_t);
         mBytes = (uint8_t*) malloc(len);
         memset(mBytes, 0, len);
       }
 
-    virtual ~Demuxer595() {}
+    ~Demuxer595() {
+      if (mBytes) {
+        free(mBytes);
+      }
+    }
 
     inline int readPin(ioPin pin) {
       return (mValues[pin / Ic595::NUM_CHANNELS] >> (pin % Ic595::NUM_CHANNELS)) & 1;
@@ -32,11 +36,19 @@ class Demuxer595 : public Demuxer {
       mAutoWrite = autoWrite;
     }
 
-    inline void writePin(ioPin pin, int value) {
-      setPin(pin, value, mAutoWrite);
+    inline void setPin(ioPin pin, int value) {
+      writePin(pin, value, mAutoWrite);
     }
 
-    inline void setPin(ioPin pin, int value, bool write = true) {
+    inline void enable() {
+      mIc595.enable();
+    }
+
+    inline void disable() {
+      mIc595.disable();
+    }
+
+    inline void writePin(ioPin pin, int value, bool write = true) {
       mChanged = true;
       if (value) {
          mValues[pin / Ic595::NUM_CHANNELS] |= 1 << (pin % Ic595::NUM_CHANNELS);
@@ -47,38 +59,28 @@ class Demuxer595 : public Demuxer {
       mCurrentPin = pin;
 
       if (write) {
-        writeAll();
+        update(true);
       }
     }
 
-    /*
-    values might be an int array like [0, 1, 0, 127, 0, 127, 0, 1]
-    we need this to be a single byte like B01010101
-    */
-    inline void writeAll(const int* values, uint8_t length = 0, bool write = true) {
+    inline void writeAll(const int* values, uint8_t length = 0) {
       if (length == 0) {
         length = mIc595.mNumIcs * Ic595::NUM_CHANNELS;
       }
 
       for (uint8_t i = 0; i < length; i++) {
-        setPin(i, values[i], false);
+        setPin(i, values[i]);
       }
 
-      if (write) {
-        writeAll();
-      }
+      update(true);
     }
 
-    inline void writeAll() {
-      if (!mChanged) {
+    inline void update(bool force = false) {
+      if (!force && !mChanged) {
         return;
       }
 
       mIc595.writeAll(mValues);
-    }
-
-    inline void update() {
-      writeAll();
     }
 };
 

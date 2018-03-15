@@ -27,7 +27,8 @@ class BaseMuxer {
       memset(mValues, 0, len);
   }
 
-  virtual ~BaseMuxer() {}
+  virtual ~BaseMuxer() {
+  }
 
   bool isAnalog(void) {
     return mAnalog;
@@ -69,10 +70,12 @@ class Demuxer : public BaseMuxer {
   public:
   Demuxer(uint8_t numChannels, bool analog = false, uint32_t delay = 0)
     : BaseMuxer(numChannels, analog, delay, false) {}
-  virtual void writePin(ioPin pin, int value);
-  virtual void setPin(ioPin pin, int value, bool update);
+  virtual void writePin(ioPin pin, int value, bool update = true);
+  virtual void setPin(ioPin pin, int value);
   inline void writeAll(int* values);
   inline void writeAll();
+  inline void enable();
+  inline void disable();
 };
 
 END_IO_NAMESPACE

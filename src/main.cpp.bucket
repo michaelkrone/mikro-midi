@@ -14,9 +14,9 @@
 // // #include <rotary/RotaryEncoder.hpp>
 // // #include <muxer/IoMuxer4051.hpp>
 // #include <muxer/IoDemuxer595.hpp>
-// static const uint8_t IC_595_1_SHCP = 28;
-// static const uint8_t IC_595_1_STCP = 27;
-// static const uint8_t IC_595_1_DS = 26;
+// static const uint8_t IC_595_0_SHCP = 28;
+// static const uint8_t IC_595_0_STCP = 27;
+// static const uint8_t IC_595_0_DS = 26;
 // #include <MackieProtocol.hpp>
 // mackie::MackieProtocol mp(mackie::OperationMode_MackieControl);
 //
@@ -43,11 +43,11 @@
 // // long positionRight = -999;
 // //
 // // io::Ic4051 ic4051(S0, S1, S2, MUX, 5, 100);
-// // io::Ic4051 ic4051_2(S0, S1, S2, MUX + 1, 2, 100);
+// // io::Ic4051 ic4051_1(S0, S1, S2, MUX + 1, 2, 100);
 // // io::Muxer4051 muxer(ic4051);
-// // io::Muxer4051 muxer2(ic4051_2);
+// // io::Muxer4051 muxer2(ic4051_1);
 // //
-// io::Ic595 ic595(IC_595_1_SHCP, IC_595_1_STCP, IC_595_1_DS, 3);
+// io::Ic595 ic595(IC_595_0_SHCP, IC_595_0_STCP, IC_595_0_DS, 3);
 // io::Demuxer595 demuxer(ic595, false, 0, false);
 // TimecodeShifter mtc(demuxer);
 //
@@ -393,4 +393,58 @@ fader.update();
   }
   // delay(1000);
   // meter.update();
+}
+
+
+/*
+   mikroMIDI main
+*/
+
+#define ANALOG_MAX 4096 
+
+// #include <MackieProtocol.hpp>
+// mackie::MackieProtocol mp(mackie::OperationMode_MackieControl);
+
+#include <Throttle.hpp>
+#include <output/IoOutput.hpp>
+#include <ic/IoIcMax72.hpp>
+
+throttle::Throttle t1(500);
+throttle::Throttle t2(3000);
+// Ic595(ioPin pinSHCP, ioPin pinSTCP, ioPin pinDS, uint8_t numIcs = 1, io::Output* enabled = NULL)
+io::IcMax72 driver(10);
+
+void setup() {
+  // analogWriteResolution(12);
+  // analogWriteFrequency(23, 8789.062);
+  // analogWriteFrequency(22, 8789.062);
+
+  Serial.begin(9600);
+  delay(225);
+  pinMode(13, OUTPUT);
+  digitalWrite(13, HIGH);
+  // fader.setValue(0);
+  delay(500);
+  digitalWrite(13, LOW);
+  Serial.println("starting .....: ");
+  // mp.begin();
+}
+
+void loop() {
+  digitalWrite(13, HIGH);
+  delay(500);
+  digitalWrite(13, LOW);
+  delay(500);
+  // read data
+  // mp.update();
+
+  if (t1.shouldUpdate()) {
+    t1.reset();
+    Serial.println("update 1");
+  }
+
+  if (t2.shouldUpdate()) {
+    t2.reset();
+    Serial.println("update 2");
+  }
 }

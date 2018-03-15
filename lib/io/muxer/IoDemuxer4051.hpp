@@ -15,11 +15,11 @@ class Demuxer4051 : public Demuxer {
 
   virtual ~Demuxer4051() {}
 
-  inline void setPin(ioPin pin, int value, bool update = true) {
+  inline void writePin(ioPin pin, int value, bool update = true) {
     writeDemux(pin, value);
   }
 
-  inline void writePin(ioPin pin, int value) {
+  inline void setPin(ioPin pin, int value) {
     writeDemux(pin, value);
   }
 
@@ -40,6 +40,15 @@ class Demuxer4051 : public Demuxer {
   inline void update() {
     writeAll(mValues);
   }
+
+  inline void enable() {
+    mIc4051.enable();
+  }
+
+  inline void disable() {
+    mIc4051.disable();
+  }
+
 
   private:
     Ic4051& mIc4051;

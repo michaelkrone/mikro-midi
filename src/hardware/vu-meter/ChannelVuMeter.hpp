@@ -1,4 +1,4 @@
-#include <muxer/IoDemuxer4051.hpp>
+#include <muxer/IoDemuxer595.hpp>
 
 #include <Throttle.hpp>
 #include "VuMeter.h"
@@ -7,7 +7,7 @@ class VuChannelMeter {
   private:
     io::Demuxer595& mDemux;
     uint8_t mChannel;
-    uint16_t mLevel, mTargetLevel, mPeak, mCurPeak;
+    uint16_t mOffset, mLevel, mTargetLevel, mPeak, mCurPeak;
     bool mClipHold, mPeakHold, mClip;
     throttle::Throttle mThrottle, mPeakHoldThrottle;
     uint16_t mFadeTime, mUpFade, mDownFade;
@@ -17,12 +17,12 @@ class VuChannelMeter {
     }
 
   public:
-
-    // demuxer has another demuxer daisy chained
+    // demuxer has at least one other demuxer daisy chained
     VuChannelMeter(io::Demuxer595& demuxer, uint8_t channel, bool clipHold = true,
         bool peakHold = false, uint16_t peakHoldTime = 3600, uint16_t fadeTime = 1200)
       : mDemux(demuxer)
       , mChannel(channel)
+      , mOffset(channel * VuMeterItemLen)
       , mLevel(0)
       , mTargetLevel(0)
       , mPeak(0)
@@ -31,8 +31,9 @@ class VuChannelMeter {
         setFadeTime(fadeTime);
         setPeakHold(peakHold, peakHoldTime);
         setClipHold(clipHold);
-        mDemux.setAutoWrite(false);
         mThrottle.setThreshold(DefaultVuMeterThreshold);
+        mDemux.setAutoWrite(false);
+        mDemux.disable();
       }
 
     virtual ~VuChannelMeter() {}
@@ -103,7 +104,12 @@ class VuChannelMeter {
           mThrottle.setThreshold(fadeTime);
         }
 
-        mDemux.writeAll(VuMeterMapping[mLevel], VuMeterItemLen, false);
+        mDemux.enable();
+        // we need to add the offset for more than 1 channel daisy chained
+        // mDemux.writeAll(VuMeterMapping[mLevel], VuMeterItemLen, false);
+        for (uint8_t i = 0; i < VuMeterItemLen; i++) {
+          mDemux.setPin(mOffset + i, VuMeterMapping[mLevel][i]);
+        }
 
         if (mPeakHold && mLevel > 0) {
           if (mPeak < mLevel) {
@@ -111,19 +117,19 @@ class VuChannelMeter {
             mPeakHoldThrottle.reset();
           } else {
             if (mCurPeak > mLevel && mCurPeak != mPeak && !isClipLevel(mCurPeak)) {
-              mDemux.writePin(mCurPeak, LOW);
+              mDemux.setPin(mOffset + mCurPeak, LOW);
             }
 
             mCurPeak = mPeak;
-            mDemux.writePin(mCurPeak, HIGH);
+            mDemux.setPin(mOffset + mCurPeak, HIGH);
           }
         }
 
         if (mClipHold) {
           if (mClip) {
-            mDemux.writePin(PeakLed, HIGH);
+            mDemux.setPin(mOffset + PeakLed, HIGH);
           } else if (!isClipLevel(mLevel)) { // reset clip
-            mDemux.writePin(PeakLed, LOW);
+            mDemux.setPin(mOffset + PeakLed, LOW);
           }
         }
 
@@ -134,7 +140,7 @@ class VuChannelMeter {
         mPeakHoldThrottle.reset();
 
         if (mCurPeak > mPeak && !isClipLevel(mCurPeak)) {
-          mDemux.setPin(mCurPeak, LOW, true);
+          mDemux.writePin(mOffset + mCurPeak, LOW);
         }
 
         mCurPeak = 0;
